@@ -11,7 +11,15 @@ function sendHttpRequest(method, url) {
 		xhr.responseType = 'json';
 
 		xhr.onload = function () {
-			resolve(xhr.response);
+			if (xhr.status >= 200 && xhr.status < 300) {
+				resolve(xhr.response);
+			} else {
+				reject(new Error('Something went wrong'));
+			}
+		};
+
+		xhr.onerror = function () {
+			reject(new Error('Failed to send a request'));
 		};
 
 		xhr.send();
@@ -21,15 +29,19 @@ function sendHttpRequest(method, url) {
 }
 
 async function getAdvice() {
-	const responseData = await sendHttpRequest(
-		'GET',
-		'https://api.adviceslip.com/advice'
-	);
+	try {
+		const responseData = await sendHttpRequest(
+			'GET',
+			'https://api.adviceslip.com/advice'
+		);
 
-	const { id, advice } = responseData.slip;
+		const { id, advice } = responseData.slip;
 
-	adviceTitleEl.innerHTML = `Advice #${id}`;
-	adviceDescEl.innerHTML = advice;
+		adviceTitleEl.innerHTML = `Advice #${id}`;
+		adviceDescEl.innerHTML = advice;
+	} catch (error) {
+		alert(error.message);
+	}
 }
 
 getAdvice();
